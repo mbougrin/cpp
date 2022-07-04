@@ -1,0 +1,9 @@
+build:
+-make
+-make re
+-make clean
+-make fclean
+run:
+-timeserver ipaddr port
+tools test:
+-nc ipaddr port
