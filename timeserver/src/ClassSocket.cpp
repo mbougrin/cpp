@@ -3,9 +3,9 @@
 using namespace std;
 using namespace std::chrono;
 
-int					ClassSocket::_sd;
+int			ClassSocket::_sd;
 struct s_fds		*ClassSocket::_fds;
-int					ClassSocket::_client;
+int			ClassSocket::_client;
 
 ClassSocket::ClassSocket(char *addr, int port) : _port(port), _addr(addr)
 {
@@ -46,15 +46,14 @@ void				ClassSocket::sighandler(int nb)
 
 void				ClassSocket::initfd(void)
 {
-	int			i;
+	int	i;
 
 	i = 0;
 	FD_ZERO(&_writefd);
 	FD_ZERO(&_readfd);
 	while (i < _maxsd)
 	{
-		if (_fds[i].type != FD_FREE)
-		{
+		if (_fds[i].type != FD_FREE) {
 			FD_SET(i, &_readfd);
 			FD_SET(i, &_writefd);
 		}
@@ -74,15 +73,15 @@ void				ClassSocket::check_fd(void)
 {
 	int		i = 0;
 
-	while ((i < _maxsd) && (_r > 0))
-	{
+	while ((i < _maxsd) && (_r > 0)) {
 		if (FD_ISSET(i, &_readfd)) {
 			_fds[i].fct_read(i);
 		}
 		if (FD_ISSET(i, &_writefd)) {
 			_fds[i].fct_write(i);
 		}
-		if (FD_ISSET(i, &_readfd) || FD_ISSET(i, &_writefd)) {
+		if (FD_ISSET(i, &_readfd)
+		    || FD_ISSET(i, &_writefd)) {
 			_r--;
 		}
 		i++;
@@ -91,8 +90,7 @@ void				ClassSocket::check_fd(void)
 
 void				ClassSocket::mainloop(void)
 {
-	while (1)
-	{
+	while (1) {
 		initfd();
 		do_select();
 		check_fd();
@@ -111,8 +109,7 @@ void				ClassSocket::clientread(int cs)
 	int r;
 
 	r = recv(cs, _fds[cs].buf_read, BUF_SIZE, 0);
-	if (r <= 1)
-	{
+	if (r <= 1) {
 		ClassSocket::cleanclient(&_fds[cs]);
 		close(cs);
 		_client--;
@@ -128,8 +125,8 @@ void				thread_write(int cs)
 {
 	while (1) {
 		struct timeval time_now{};
-    	gettimeofday(&time_now, nullptr);
-    	time_t msecs_time = (time_now.tv_sec * 1000) + (time_now.tv_usec / 1000);
+    		gettimeofday(&time_now, nullptr);
+    		time_t msecs_time = (time_now.tv_sec * 1000) + (time_now.tv_usec / 1000);
 		std::stringstream ss;
 		ss << msecs_time;
 		ss << "\n";
@@ -148,13 +145,11 @@ void				ClassSocket::acceptclient(int i)
 
 	(void)i;
 	csin_len = sizeof(csin);
-	if ((cs = accept(_sd, (struct sockaddr *)&csin, &csin_len)) == -1)
-	{
+	if ((cs = accept(_sd, (struct sockaddr *)&csin, &csin_len)) == -1) {
 		exit(-1);
 	}
 	ClassSocket::cleanclient(&_fds[cs]);
-	if (_client >= MAX_USER)
-	{
+	if (_client >= MAX_USER) {
 		close(cs);
 		return ;
 	}
@@ -164,7 +159,7 @@ void				ClassSocket::acceptclient(int i)
 	_client++;
 	send(cs, "hey\n", 4, 0);
 	thread t1(thread_write, cs);
-    t1.detach();
+     	t1.detach();
 }
 
 void				ClassSocket::createsocket(void)
